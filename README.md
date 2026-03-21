@@ -23,6 +23,19 @@ What the local edition means:
 
 ## Install
 
+### Homebrew
+
+```bash
+brew tap nativ3ai/prediup
+brew install prediup
+```
+
+Or directly:
+
+```bash
+brew install nativ3ai/prediup/prediup
+```
+
 ### pipx from GitHub
 
 ```bash
