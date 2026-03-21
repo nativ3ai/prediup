@@ -27,13 +27,13 @@ What the local edition means:
 
 ```bash
 brew tap nativ3ai/prediup
-brew install prediup
+brew install predihermes
 ```
 
 Or directly:
 
 ```bash
-brew install nativ3ai/prediup/prediup
+brew install nativ3ai/prediup/predihermes
 ```
 
 ### pipx from GitHub
@@ -59,6 +59,11 @@ pipx install .
 ## Usage
 
 ```bash
+predihermes doctor
+predihermes install
+predihermes verify
+predihermes status
+
 prediup doctor
 prediup install
 prediup verify
@@ -68,18 +73,18 @@ prediup status
 Recommended first run:
 
 ```bash
-prediup doctor
-prediup install
-prediup verify
-prediup status
+predihermes doctor
+predihermes install
+predihermes verify
+predihermes status
 ```
 
 ## Common options
 
 ```bash
-prediup install --ollama-model qwen2.5:3b
-prediup install --with-video-transcriber
-prediup install --repo-root ~/src/hermes-geopolitical-market-sim --stack-home ~/predihermes
+predihermes install --ollama-model qwen2.5:3b
+predihermes install --with-video-transcriber
+predihermes install --repo-root ~/src/hermes-geopolitical-market-sim --stack-home ~/predihermes
 ```
 
 ## What install does
@@ -97,13 +102,13 @@ By default the main repo installer will also:
 
 ## Verification targets
 
-`prediup verify` checks for:
+`predihermes verify` checks for:
 - the installed Hermes skill
 - `predihermes-local-up`
 - `predihermes-local-health`
 - the generated local MiroFish `.env`
 
-`prediup status` prints the resolved local profile values from the generated MiroFish `.env`, including:
+`predihermes status` prints the resolved local profile values from the generated MiroFish `.env`, including:
 - `LLM_BASE_URL`
 - `LLM_MODEL_NAME`
 - `GRAPH_BACKEND`

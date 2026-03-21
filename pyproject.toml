@@ -14,6 +14,7 @@ dependencies = []
 
 [project.scripts]
 prediup = "prediup.cli:main"
+predihermes = "prediup.cli:main"
 
 [tool.setuptools]
 packages = ["prediup"]
