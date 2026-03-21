@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "prediup"
+version = "0.1.0"
+description = "One-command installer for the PrediHermes local edition"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "nativ3ai" }]
+dependencies = []
+
+[project.scripts]
+prediup = "prediup.cli:main"
+
+[tool.setuptools]
+packages = ["prediup"]
