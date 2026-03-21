@@ -59,11 +59,6 @@ pipx install .
 ## Usage
 
 ```bash
-predihermes doctor
-predihermes install
-predihermes verify
-predihermes status
-
 prediup doctor
 prediup install
 prediup verify
@@ -73,18 +68,18 @@ prediup status
 Recommended first run:
 
 ```bash
-predihermes doctor
-predihermes install
-predihermes verify
-predihermes status
+prediup doctor
+prediup install
+prediup verify
+prediup status
 ```
 
 ## Common options
 
 ```bash
-predihermes install --ollama-model qwen2.5:3b
-predihermes install --with-video-transcriber
-predihermes install --repo-root ~/src/hermes-geopolitical-market-sim --stack-home ~/predihermes
+prediup install --ollama-model qwen2.5:3b
+prediup install --with-video-transcriber
+prediup install --repo-root ~/src/hermes-geopolitical-market-sim --stack-home ~/predihermes
 ```
 
 ## What install does
@@ -102,13 +97,13 @@ By default the main repo installer will also:
 
 ## Verification targets
 
-`predihermes verify` checks for:
+`prediup verify` checks for:
 - the installed Hermes skill
 - `predihermes-local-up`
 - `predihermes-local-health`
 - the generated local MiroFish `.env`
 
-`predihermes status` prints the resolved local profile values from the generated MiroFish `.env`, including:
+`prediup status` prints the resolved local profile values from the generated MiroFish `.env`, including:
 - `LLM_BASE_URL`
 - `LLM_MODEL_NAME`
 - `GRAPH_BACKEND`
