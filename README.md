@@ -1,6 +1,6 @@
 # prediup
 
-`prediup` is the one-command installer for the fully local PrediHermes edition.
+`prediup` is the one-command installer and in-place updater for the fully local PrediHermes edition.
 
 It bootstraps:
 - the `geopolitical-market-sim` Hermes skill
@@ -61,6 +61,7 @@ pipx install .
 ```bash
 prediup doctor
 prediup install
+prediup update
 prediup verify
 prediup status
 ```
@@ -70,6 +71,7 @@ Recommended first run:
 ```bash
 prediup doctor
 prediup install
+prediup update
 prediup verify
 prediup status
 ```
@@ -78,6 +80,7 @@ prediup status
 
 ```bash
 prediup install --ollama-model qwen2.5:3b
+prediup update --ollama-model qwen2.5:7b
 prediup install --with-video-transcriber
 prediup install --repo-root ~/src/hermes-geopolitical-market-sim --stack-home ~/predihermes
 ```
@@ -94,6 +97,17 @@ By default the main repo installer will also:
 - start or install Ollama when needed on macOS with Homebrew
 - pull the requested Ollama model if it is missing
 - write the local stack pointers into `~/.hermes/.env`
+
+## What update does
+
+`prediup update` is the forward path after the first install.
+
+It will:
+- fetch and rebase the local `hermes-geopolitical-market-sim` checkout to the selected repo ref
+- rerun the local installer in place
+- refresh the installed skill copy, helper launchers, and local companion wiring
+
+It will stop if the checked-out repo has local uncommitted changes.
 
 ## Verification targets
 

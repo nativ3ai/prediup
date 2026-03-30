@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Iterable
 
 REPO_URL = "https://github.com/nativ3ai/hermes-geopolitical-market-sim.git"
+DEFAULT_REPO_REF = "main"
 DEFAULT_REPO_ROOT = Path.home() / "src" / "hermes-geopolitical-market-sim"
 DEFAULT_STACK_HOME = Path.home() / "predihermes"
 DEFAULT_HERMES_HOME = Path.home() / ".hermes"
@@ -36,6 +37,28 @@ def ensure_repo(repo_root: Path) -> None:
         raise SystemExit(f"Target exists but is not a git repo: {repo_root}")
     repo_root.parent.mkdir(parents=True, exist_ok=True)
     run(["git", "clone", "--depth", "1", REPO_URL, str(repo_root)])
+
+
+def ensure_clean_repo(repo_root: Path) -> None:
+    proc = subprocess.run(
+        ["git", "status", "--porcelain"],
+        cwd=str(repo_root),
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    if proc.stdout.strip():
+        raise SystemExit(
+            f"Repo has local changes: {repo_root}. Commit, stash, or clean them before running prediup update."
+        )
+
+
+def sync_repo(repo_root: Path, repo_ref: str) -> None:
+    ensure_repo(repo_root)
+    ensure_clean_repo(repo_root)
+    run(["git", "fetch", "origin", repo_ref, "--tags"], cwd=repo_root)
+    run(["git", "checkout", repo_ref], cwd=repo_root)
+    run(["git", "pull", "--rebase", "origin", repo_ref], cwd=repo_root)
 
 
 def hermes_installed(hermes_home: Path) -> bool:
@@ -71,28 +94,57 @@ def install(args: argparse.Namespace) -> int:
     if not hermes_installed(hermes_home):
         raise SystemExit("Hermes Agent is not installed. Install Hermes first, then rerun prediup install.")
 
-    ensure_repo(repo_root)
+    sync_repo(repo_root, args.repo_ref)
 
+    return run_install(
+        repo_root=repo_root,
+        stack_home=stack_home,
+        hermes_home=hermes_home,
+        ollama_model=args.ollama_model,
+        ollama_base_url=args.ollama_base_url,
+        with_video_transcriber=bool(args.with_video_transcriber),
+        skip_ollama_install=bool(args.skip_ollama_install),
+        skip_ollama_pull=bool(args.skip_ollama_pull),
+        skip_hermes_env=bool(args.skip_hermes_env),
+        skip_worldosint_install=bool(args.skip_worldosint_install),
+        skip_mirofish_install=bool(args.skip_mirofish_install),
+    )
+
+
+def run_install(
+    *,
+    repo_root: Path,
+    stack_home: Path,
+    hermes_home: Path,
+    ollama_model: str,
+    ollama_base_url: str,
+    with_video_transcriber: bool,
+    skip_ollama_install: bool,
+    skip_ollama_pull: bool,
+    skip_hermes_env: bool,
+    skip_worldosint_install: bool,
+    skip_mirofish_install: bool,
+) -> int:
     install_cmd = [
         "bash",
         "install.sh",
         "--bootstrap-local",
         "--ollama-model",
-        args.ollama_model,
+        ollama_model,
         "--ollama-base-url",
-        args.ollama_base_url,
+        ollama_base_url,
     ]
-    if args.with_video_transcriber:
+    if with_video_transcriber:
         install_cmd.append("--with-video-transcriber")
-    if args.skip_ollama_install:
+    if skip_ollama_install:
         install_cmd.append("--skip-ollama-install")
-    if args.skip_ollama_pull:
+    if skip_ollama_pull:
         install_cmd.append("--skip-ollama-pull")
-    if args.skip_hermes_env:
+    if skip_hermes_env:
         install_cmd.append("--skip-hermes-env")
-    if args.skip_worldosint_install:
+    if skip_worldosint_install:
         install_cmd.append("--skip-worldosint-install")
-    if args.skip_mirofish_install:
+    if skip_mirofish_install:
         install_cmd.append("--skip-mirofish-install")
 
     env = os.environ.copy()
@@ -100,6 +152,30 @@ def install(args: argparse.Namespace) -> int:
     env["HERMES_HOME"] = str(hermes_home)
     run(install_cmd, cwd=repo_root, env=env)
     return 0
+
+
+def update(args: argparse.Namespace) -> int:
+    repo_root = args.repo_root.expanduser().resolve()
+    stack_home = args.stack_home.expanduser().resolve()
+    hermes_home = args.hermes_home.expanduser().resolve()
+
+    if not hermes_installed(hermes_home):
+        raise SystemExit("Hermes Agent is not installed. Install Hermes first, then rerun prediup update.")
+
+    sync_repo(repo_root, args.repo_ref)
+    return run_install(
+        repo_root=repo_root,
+        stack_home=stack_home,
+        hermes_home=hermes_home,
+        ollama_model=args.ollama_model,
+        ollama_base_url=args.ollama_base_url,
+        with_video_transcriber=bool(args.with_video_transcriber),
+        skip_ollama_install=bool(args.skip_ollama_install),
+        skip_ollama_pull=bool(args.skip_ollama_pull),
+        skip_hermes_env=bool(args.skip_hermes_env),
+        skip_worldosint_install=bool(args.skip_worldosint_install),
+        skip_mirofish_install=bool(args.skip_mirofish_install),
+    )
 
 
 def verify(args: argparse.Namespace) -> int:
@@ -142,8 +218,9 @@ def status(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Installer for the PrediHermes local edition")
-    parser.add_argument("command", choices=["doctor", "install", "verify", "status"])
+    parser.add_argument("command", choices=["doctor", "install", "update", "verify", "status"])
     parser.add_argument("--repo-root", type=Path, default=DEFAULT_REPO_ROOT)
+    parser.add_argument("--repo-ref", default=DEFAULT_REPO_REF)
     parser.add_argument("--stack-home", type=Path, default=DEFAULT_STACK_HOME)
     parser.add_argument("--hermes-home", type=Path, default=DEFAULT_HERMES_HOME)
     parser.add_argument("--ollama-model", default="qwen2.5:7b")
@@ -164,6 +241,8 @@ def main(argv: Iterable[str] | None = None) -> int:
         return doctor(args)
     if args.command == "install":
         return install(args)
+    if args.command == "update":
+        return update(args)
     if args.command == "verify":
         return verify(args)
     if args.command == "status":
